@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DMArbetsprovCharacter.h"
+#include "PowerupBase.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "ItemPickupSpawner.generated.h"
@@ -24,10 +26,32 @@ public:
 	// Called every frame
 	//virtual void Tick(float DeltaTime) override;
 
+public:
+
+	////////////////////////////////////////////////
+	// Components
+
 	UPROPERTY(EditAnywhere)
 	USphereComponent* trigger;
 
 	UPROPERTY(EditAnywhere)
 	USceneComponent* itemSpawnRoot;
+
+	////////////////////////////////////////////////
+	// Vars
+
+	UPROPERTY(BlueprintReadWrite)
+	UPowerupBase* currentPowerup;
+
+public:
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Item Pickup Spawner")
+	void OnPickupEmpty();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Item Pickup Spawner")
+	void OnPickup();
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AActor* _otherActor, UPrimitiveComponent* _otherComponent, int32 _otherIndex, bool _bFromSweep, const FHitResult& _sweepResult);
 
 };

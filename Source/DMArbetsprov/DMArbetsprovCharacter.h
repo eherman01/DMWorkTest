@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Blueprint/UserWidget.h"
 #include "DMArbetsprovCharacter.generated.h"
 
 class UInputComponent;
@@ -52,6 +53,7 @@ protected:
 	virtual void BeginPlay();
 
 public:
+
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseTurnRate;
@@ -80,8 +82,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
 
+	//TODO: Make protected and add Getter/Setter functions
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
+	float maxHealth = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
+	float health = 100.0f;
+
 protected:
-	
+
 	/** Fires a projectile. */
 	void OnFire();
 

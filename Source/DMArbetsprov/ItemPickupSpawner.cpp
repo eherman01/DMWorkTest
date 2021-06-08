@@ -23,7 +23,30 @@ AItemPickupSpawner::AItemPickupSpawner()
 void AItemPickupSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	trigger->OnComponentBeginOverlap.AddDynamic(this, &AItemPickupSpawner::OnOverlapBegin);
+
+}
+
+void AItemPickupSpawner::OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AActor* _otherActor, UPrimitiveComponent* _otherComponent, int32 _otherIndex, bool _bFromSweep, const FHitResult& _sweepResult)
+{
+
+	bool isPlayer = _otherActor->IsA(ADMArbetsprovCharacter::StaticClass());
+	if (!isPlayer)
+		return;
+
+	if (currentPowerup == nullptr) 
+	{
+		OnPickupEmpty();
+		return;
+	}
+
+	//Do Local player stuff (handling item pickup etc, done through blueprints)
+	OnPickup();
+
+	//Do Server stuff (applying stats etc)
+	if (GetNetMode() < NM_Client) 
+		currentPowerup->PlayerApplyPowerup(_otherActor);
+
 }
 
 // Called every frame
