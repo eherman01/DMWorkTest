@@ -89,6 +89,11 @@ void ADMArbetsprovCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	if (ingameUI != nullptr) {
+		ingameUI->AddToViewport();
+		ingameUI->UpdateHealthbar(health, maxHealth);
+	}
+
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 
@@ -103,6 +108,37 @@ void ADMArbetsprovCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////
+//HEALTH STUFF TODO: Refactor to Actor component class so it can be used on NPCs
+
+float ADMArbetsprovCharacter::GetHealth()
+{
+	return health;
+}
+
+float ADMArbetsprovCharacter::GetMaxHealth()
+{
+	return maxHealth;
+}
+
+void ADMArbetsprovCharacter::SetHealth(float _health)
+{
+	health = _health;
+
+	if (ingameUI != nullptr)
+		ingameUI->UpdateHealthbar(health, maxHealth);
+
+}
+
+void ADMArbetsprovCharacter::SetMaxHealth(float _maxHealth)
+{
+	maxHealth = _maxHealth;
+
+	if (ingameUI != nullptr)
+		ingameUI->UpdateHealthbar(health, maxHealth);
+
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -3,23 +3,39 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataAsset.h"
+#include "GameFramework/Actor.h"
+#include "DMArbetsprovCharacter.h"
+#include "Components/SphereComponent.h"
 #include "PowerupBase.generated.h"
 
-/**
- * 
- */
-UCLASS(Blueprintable)
-class DMARBETSPROV_API UPowerupBase : public UDataAsset
+UCLASS()
+class DMARBETSPROV_API APowerupBase : public AActor
 {
 	GENERATED_BODY()
-
-public:
-
-	UPROPERTY(EditAnywhere)
-	FString name;
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup", meta = (ToolTip = "Should only ever run on server"))
-	void PlayerApplyPowerup(AActor* _player);
 	
+public:	
+	// Sets default values for this actor's properties
+	APowerupBase();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:	
+
+	UPROPERTY(EditAnywhere, Category = "Trigger")
+	USphereComponent* trigger;
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AActor* _otherActor, UPrimitiveComponent* _otherComponent, int32 _otherIndex, bool _bFromSweep, const FHitResult& _sweepResult);
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
+	void OnPickup();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
+	void PlayerApplyPowerup(AActor* _player);
+
 };

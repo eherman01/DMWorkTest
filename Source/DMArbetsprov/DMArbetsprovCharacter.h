@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Blueprint/UserWidget.h"
+#include "IngameUI.h"
 #include "DMArbetsprovCharacter.generated.h"
 
 class UInputComponent;
@@ -82,14 +83,27 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
 
-	//TODO: Make protected and add Getter/Setter functions
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
-	float maxHealth = 100.0f;
+	/** Ingame UI class instance **/
+	UPROPERTY(EditAnywhere)
+	UIngameUI* ingameUI;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
-	float health = 100.0f;
+	UFUNCTION(BlueprintCallable)
+	float GetHealth();
+
+	UFUNCTION(BlueprintCallable)
+	float GetMaxHealth();
 
 protected:
+
+	UPROPERTY(EditAnywhere)
+	float health;
+
+	UPROPERTY(EditAnywhere)
+	float maxHealth;
+
+	void SetHealth(float _health);
+
+	void SetMaxHealth(float _maxHealth);
 
 	/** Fires a projectile. */
 	void OnFire();
