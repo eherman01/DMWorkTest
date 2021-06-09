@@ -41,4 +41,3 @@ void APowerupBase::OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AAc
 		PlayerApplyPowerup(_otherActor); //TODO: Fix better way of handling player stats
 	
 }
-
