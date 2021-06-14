@@ -8,7 +8,7 @@
 #include "Components/SphereComponent.h"
 #include "PowerupBase.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class DMARBETSPROV_API APowerupBase : public AActor
 {
 	GENERATED_BODY()

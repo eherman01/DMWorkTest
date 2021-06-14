@@ -35,6 +35,28 @@ void APowerupPickupSpawner::SpawnPowerup(TSubclassOf<APowerupBase> _powerup)
 
 }
 
+ADMArbetsprovGameMode* APowerupPickupSpawner::GetCastedGamemode(EBranchEnum & Branches)
+{
+	if (IsNetMode(ENetMode::NM_Client))
+	{
+		Branches = EBranchEnum::FAIL;
+		return nullptr;
+	}
+
+	ADMArbetsprovGameMode* gm = Cast<ADMArbetsprovGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (!gm)
+	{
+		Branches = EBranchEnum::FAIL;
+		return nullptr;
+	}
+
+
+	Branches = EBranchEnum::SUCCESS;
+	return gm;
+
+}
+
 // Called every frame
 /*void AItemPickupSpawner::Tick(float DeltaTime)
 {

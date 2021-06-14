@@ -3,16 +3,31 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
+#include "PowerupBase.h"
 #include "DMArbetsprovGameMode.generated.h"
 
 UCLASS(minimalapi)
-class ADMArbetsprovGameMode : public AGameModeBase
+class ADMArbetsprovGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
 public:
 	ADMArbetsprovGameMode();
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float powerupSpawnDelay;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float powerupRespawnTime;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<APowerupBase>> powerups;
+
+	UFUNCTION(BlueprintCallable)
+	TSubclassOf<APowerupBase> GetRandomPowerup();
+
 };
 
 

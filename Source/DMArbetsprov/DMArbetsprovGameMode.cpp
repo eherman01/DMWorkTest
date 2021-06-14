@@ -3,6 +3,7 @@
 #include "DMArbetsprovGameMode.h"
 #include "DMArbetsprovHUD.h"
 #include "DMArbetsprovCharacter.h"
+//#include "Math/UnrealMathUtility.h"
 #include "UObject/ConstructorHelpers.h"
 
 ADMArbetsprovGameMode::ADMArbetsprovGameMode()
@@ -14,4 +15,14 @@ ADMArbetsprovGameMode::ADMArbetsprovGameMode()
 
 	// use our custom HUD class
 	HUDClass = ADMArbetsprovHUD::StaticClass();
+}
+
+TSubclassOf<APowerupBase> ADMArbetsprovGameMode::GetRandomPowerup()
+{
+	if (powerups.Num() <= 0)
+		return nullptr;
+
+	int rand = FMath::RandRange(0, powerups.Num() - 1);
+	return powerups[rand];
+
 }

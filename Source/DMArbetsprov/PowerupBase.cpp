@@ -33,7 +33,7 @@ void APowerupBase::OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AAc
 	if (!isPlayer)
 		return;
 
-	//Do Local player stuff (handling item pickup etc, done through blueprints)
+	//Do Local player stuff (handling item pickup etc)
 	OnPickup();
 
 	//Do Server stuff (applying stats etc)
