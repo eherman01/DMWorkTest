@@ -8,6 +8,8 @@
 #include "Components/SphereComponent.h"
 #include "PowerupBase.generated.h"
 
+DECLARE_DELEGATE(OnPickupDelegate)
+
 UCLASS(Abstract)
 class DMARBETSPROV_API APowerupBase : public AActor
 {
@@ -25,6 +27,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Trigger")
 	USphereComponent* trigger;
+
+	OnPickupDelegate OnPickupDel;
+
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

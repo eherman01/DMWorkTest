@@ -36,6 +36,9 @@ void APowerupBase::OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AAc
 	//Do Local player stuff (handling item pickup etc)
 	OnPickup();
 
+	//Callback to powerup base
+	OnPickupDel.ExecuteIfBound();
+
 	//Do Server stuff (applying stats etc)
 	if (GetNetMode() < NM_Client)
 		PlayerApplyPowerup(_otherActor); //TODO: Fix better way of handling player stats

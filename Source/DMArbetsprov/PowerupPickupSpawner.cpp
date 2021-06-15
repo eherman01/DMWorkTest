@@ -32,7 +32,8 @@ void APowerupPickupSpawner::SpawnPowerup(TSubclassOf<APowerupBase> _powerup)
 
 	APowerupBase* powerup = GetWorld()->SpawnActor<APowerupBase>(_powerup, spawnPos, spawnRot, spawnInfo);
 	powerup->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-
+	powerup->OnPickupDel.BindUObject(this, &APowerupPickupSpawner::OnPickup);
+	
 }
 
 ADMArbetsprovGameMode* APowerupPickupSpawner::GetCastedGamemode(EBranchEnum & Branches)
