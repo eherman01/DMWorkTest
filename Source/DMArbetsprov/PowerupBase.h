@@ -41,6 +41,6 @@ public:
 	void OnPickup();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
-	void PlayerApplyPowerup(AActor* _player);
+	void PlayerApplyPowerup(ADMArbetsprovCharacter* _player);
 
 };

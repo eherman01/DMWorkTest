@@ -22,6 +22,10 @@ ADMArbetsprovCharacter::ADMArbetsprovCharacter()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
+	//Create stat component
+	characterStats = CreateDefaultSubobject<UCharacterStats>(TEXT("CharacterStats"));
+	characterStats->SetIsReplicated(true);
+
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
@@ -84,15 +88,27 @@ ADMArbetsprovCharacter::ADMArbetsprovCharacter()
 	//bUsingMotionControllers = true;
 }
 
+void ADMArbetsprovCharacter::Heal(AActor* healingSource, float healingAmount)
+{
+
+	if (IsNetMode(NM_Client))
+		return;
+
+	if (healingAmount <= 0)
+		return;
+	
+	OnHeal.Broadcast(healingSource, healingAmount);
+
+}
+
 void ADMArbetsprovCharacter::BeginPlay()
 {
+	// Set up stat delegates
+	this->OnTakeAnyDamage.AddDynamic(characterStats, &UCharacterStats::TakeDamage);
+	this->OnHeal.AddUObject(characterStats, &UCharacterStats::Heal);
+
 	// Call the base class  
 	Super::BeginPlay();
-
-	if (ingameUI != nullptr) {
-		ingameUI->AddToViewport();
-		ingameUI->UpdateHealthbar(health, maxHealth);
-	}
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
@@ -108,37 +124,6 @@ void ADMArbetsprovCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
-}
-
-///////////////////////////////////////////////////////////////////////////
-//HEALTH STUFF TODO: Refactor to Actor component class so it can be used on NPCs
-
-float ADMArbetsprovCharacter::GetHealth()
-{
-	return health;
-}
-
-float ADMArbetsprovCharacter::GetMaxHealth()
-{
-	return maxHealth;
-}
-
-void ADMArbetsprovCharacter::SetHealth(float _health)
-{
-	health = _health;
-
-	if (ingameUI != nullptr)
-		ingameUI->UpdateHealthbar(health, maxHealth);
-
-}
-
-void ADMArbetsprovCharacter::SetMaxHealth(float _maxHealth)
-{
-	maxHealth = _maxHealth;
-
-	if (ingameUI != nullptr)
-		ingameUI->UpdateHealthbar(health, maxHealth);
-
 }
 
 //////////////////////////////////////////////////////////////////////////

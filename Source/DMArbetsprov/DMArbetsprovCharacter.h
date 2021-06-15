@@ -5,10 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Blueprint/UserWidget.h"
-#include "IngameUI.h"
+#include "CharacterStats.h"
 #include "DMArbetsprovCharacter.generated.h"
 
 class UInputComponent;
+
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(HealDelegate, AActor*, float)
 
 UCLASS(config=Game)
 class ADMArbetsprovCharacter : public ACharacter
@@ -47,8 +50,16 @@ class ADMArbetsprovCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMotionControllerComponent* L_MotionController;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UCharacterStats* characterStats;
+
 public:
 	ADMArbetsprovCharacter();
+
+	HealDelegate OnHeal;
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void Heal(AActor* healingSource, float healingAmount);
 
 protected:
 	virtual void BeginPlay();
@@ -83,27 +94,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
 
-	/** Ingame UI class instance **/
-	UPROPERTY(EditAnywhere)
-	UIngameUI* ingameUI;
-
-	UFUNCTION(BlueprintCallable)
-	float GetHealth();
-
-	UFUNCTION(BlueprintCallable)
-	float GetMaxHealth();
-
 protected:
-
-	UPROPERTY(EditAnywhere)
-	float health;
-
-	UPROPERTY(EditAnywhere)
-	float maxHealth;
-
-	void SetHealth(float _health);
-
-	void SetMaxHealth(float _maxHealth);
 
 	/** Fires a projectile. */
 	void OnFire();

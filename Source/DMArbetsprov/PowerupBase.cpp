@@ -9,6 +9,7 @@ APowerupBase::APowerupBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	trigger = CreateDefaultSubobject<USphereComponent>(TEXT("Trigger"));
+	RootComponent = trigger;
 
 }
 
@@ -29,8 +30,9 @@ void APowerupBase::Tick(float DeltaTime)
 
 void APowerupBase::OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AActor* _otherActor, UPrimitiveComponent* _otherComponent, int32 _otherIndex, bool _bFromSweep, const FHitResult& _sweepResult)
 {
-	bool isPlayer = _otherActor->IsA(ADMArbetsprovCharacter::StaticClass());
-	if (!isPlayer)
+	ADMArbetsprovCharacter* player = Cast<ADMArbetsprovCharacter>(_otherActor);
+
+	if (!player)
 		return;
 
 	//Do Local player stuff (handling item pickup etc)
@@ -40,7 +42,10 @@ void APowerupBase::OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AAc
 	OnPickupDel.ExecuteIfBound();
 
 	//Do Server stuff (applying stats etc)
-	if (GetNetMode() < NM_Client)
-		PlayerApplyPowerup(_otherActor); //TODO: Fix better way of handling player stats
+	if (GetNetMode() < NM_Client) 
+		PlayerApplyPowerup(player);
+
+	//Destroy
+	Destroy();
 	
 }
