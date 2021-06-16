@@ -44,7 +44,4 @@ public:
 	UFUNCTION()
 	void Heal(AActor* healingSource, float healAmount);
 
-	UFUNCTION()
-	void GiveAmmo(AActor * source, int amount);
-
 };
