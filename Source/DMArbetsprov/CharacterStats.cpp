@@ -41,6 +41,7 @@ void UCharacterStats::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	
 	DOREPLIFETIME(UCharacterStats, MaxHealth);
 	DOREPLIFETIME(UCharacterStats, Health);
+
 }
 
 void UCharacterStats::TakeDamage(AActor * damagedActor, float damage, const UDamageType * damageType, AController * instigator, AActor * sourceActor)
@@ -60,4 +61,3 @@ void UCharacterStats::Heal(AActor* healingSource, float healAmount)
 	Health = FMath::Min(Health + healAmount, MaxHealth);
 
 }
-
