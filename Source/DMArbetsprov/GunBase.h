@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "GunBase.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FireDelegate)
+
 UCLASS()
 class DMARBETSPROV_API AGunBase : public AActor
 {
@@ -14,10 +16,18 @@ class DMARBETSPROV_API AGunBase : public AActor
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class USkeletalMeshComponent* GunMesh;
+
+	FireDelegate OnFire;
 	
 public:	
 	// Sets default values for this actor's properties
 	AGunBase();
+
+	UPROPERTY(EditAnywhere, Category = Ammo)
+	int StartingAmmo;
+
+	UPROPERTY(EditAnywhere, Category = Ammo)
+	int ClipSize;
 
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
@@ -31,6 +41,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	class UAnimMontage* FireAnimation;
 
+	class UCharacterStats* characterStats;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -39,6 +51,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void OnFire();
+	void Init(UCharacterStats* stats);
+
+	void TryFire();
+
+	UFUNCTION()
+	void Fire();
+
+	void Reload();
 
 };

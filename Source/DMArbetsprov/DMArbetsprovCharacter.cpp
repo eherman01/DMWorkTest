@@ -59,12 +59,34 @@ void ADMArbetsprovCharacter::Heal(AActor* healingSource, float healingAmount)
 
 }
 
+void ADMArbetsprovCharacter::GiveAmmo(AActor* ammoSource, int amount)
+{
+
+	if (IsNetMode(NM_Client))
+		return;
+
+	if (amount <= 0)
+		return;
+
+	UE_LOG(LogTemp, Warning, TEXT("GiveAmmo"));
+	characterStats->GiveAmmo(ammoSource, amount);	//Maybe make delegate for consistency / UI integration
+
+}
+
 void ADMArbetsprovCharacter::GiveNewWeapon(TSubclassOf<AGunBase> weapon)
 {
 	FActorSpawnParameters spawnInfo;
 	FTransform spawnTransform = GetActorTransform();
 
 	Gun = GetWorld()->SpawnActor<AGunBase>(weapon, spawnTransform, spawnInfo);
+	if (!Gun) 
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to spawn Gun!"));
+		return;
+	}
+
+	Gun->Init(characterStats);
+
 
 	if (IsLocallyControlled()) 
 	{
@@ -100,8 +122,9 @@ void ADMArbetsprovCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	// Bind fire event
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADMArbetsprovCharacter::OnFire);
+	// Bind fire and reload events
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADMArbetsprovCharacter::Fire);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADMArbetsprovCharacter::Reload);
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADMArbetsprovCharacter::MoveForward);
@@ -116,10 +139,21 @@ void ADMArbetsprovCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADMArbetsprovCharacter::LookUpAtRate);
 }
 
-void ADMArbetsprovCharacter::OnFire()
+void ADMArbetsprovCharacter::Fire()
 {
-	if (Gun)
-		Gun->OnFire();
+	if (!Gun)
+		return;
+
+	Gun->TryFire();
+
+}
+
+void ADMArbetsprovCharacter::Reload()
+{
+	if (!Gun)
+		return;
+
+	Gun->Reload();
 }
 
 void ADMArbetsprovCharacter::MoveForward(float Value)

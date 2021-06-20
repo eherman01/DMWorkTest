@@ -23,12 +23,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
-
-protected:
 
 	UPROPERTY(replicated, EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
@@ -36,12 +30,31 @@ protected:
 	UPROPERTY(replicated, EditAnywhere, BlueprintReadOnly, Category = "Health")
 	float Health;
 
+	UPROPERTY(replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	int Ammo;
+
+	UPROPERTY(replicated, EditAnywhere, BlueprintReadOnly, Category = "Ammo")
+	int AmmoInClip;
+
 public:
+
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
 	UFUNCTION()
 	void TakeDamage(AActor* damagedActor, float damage, const UDamageType* damageType, class AController* instigator, AActor* sourceActor);
 
 	UFUNCTION()
 	void Heal(AActor* healingSource, float healAmount);
+
+	UFUNCTION()
+	void GiveAmmo(AActor * ammoSource, int amount);
+
+	UFUNCTION()
+	void Fire();
+
+	void Reload(int clipSize);
 
 };

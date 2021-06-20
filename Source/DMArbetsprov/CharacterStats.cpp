@@ -11,7 +11,6 @@ UCharacterStats::UCharacterStats()
 	PrimaryComponentTick.bCanEverTick = false;
 
 	Owner = GetOwner();
-
 	bReplicates = true;
 
 	MaxHealth = 100.0f;
@@ -39,8 +38,10 @@ void UCharacterStats::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(UCharacterStats, MaxHealth);
-	DOREPLIFETIME(UCharacterStats, Health);
+	DOREPLIFETIME_CONDITION(UCharacterStats, MaxHealth, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UCharacterStats, Health, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UCharacterStats, Ammo, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UCharacterStats, AmmoInClip, COND_OwnerOnly);
 
 }
 
@@ -60,4 +61,32 @@ void UCharacterStats::Heal(AActor* healingSource, float healAmount)
 
 	Health = FMath::Min(Health + healAmount, MaxHealth);
 
+}
+
+void UCharacterStats::GiveAmmo(AActor* ammoSource, int amount)
+{
+	if (amount <= 0)
+		return;
+
+	Ammo += amount;
+
+}
+
+void UCharacterStats::Fire()
+{
+
+	if (AmmoInClip < 1)
+		return;
+
+	AmmoInClip -= 1;
+}
+
+void UCharacterStats::Reload(int clipSize)
+{
+	if (clipSize < 1)
+		return;
+
+	int ammoToLoad = FMath::Min(clipSize - AmmoInClip, Ammo);
+	AmmoInClip += ammoToLoad;
+	Ammo -= ammoToLoad;
 }

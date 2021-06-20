@@ -4,6 +4,7 @@
 #include "GunBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/AnimInstance.h"
+#include "CharacterStats.h"
 #include "DMArbetsprovProjectile.h"
 
 // Sets default values
@@ -24,7 +25,7 @@ AGunBase::AGunBase()
 void AGunBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -34,7 +35,50 @@ void AGunBase::Tick(float DeltaTime)
 
 }
 
-void AGunBase::OnFire()
+void AGunBase::Init(UCharacterStats* stats)
+{
+	if (!stats)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Init failed: CharacterStats not set"));
+		return;
+	}
+
+	characterStats = stats;
+	characterStats->Reload(ClipSize);
+
+	OnFire.AddUObject(this, &AGunBase::Fire);
+	OnFire.AddUObject(characterStats, &UCharacterStats::Fire);
+
+	if (IsNetMode(NM_Client))
+		return;
+
+	characterStats->GiveAmmo(this, StartingAmmo);
+}
+
+void AGunBase::TryFire() 
+{
+	if (!characterStats) 
+	{
+		UE_LOG(LogTemp, Error, TEXT("CharacterStats not set. Did you forget to call Init?"));
+		return;
+	}
+
+	if (characterStats->AmmoInClip > 0)
+	{
+		if (!IsNetMode(NM_Client))
+		{
+			//Handle cheating attempt
+			//Clients may still shoot locally but no damage will be applied if cheating is detected
+			return;
+		}
+
+		OnFire.Broadcast();
+
+	}	
+
+}
+
+void AGunBase::Fire()
 {
 	// try and fire a projectile
 	if (ProjectileClass != NULL)
@@ -70,5 +114,21 @@ void AGunBase::OnFire()
 			AnimInstance->Montage_Play(FireAnimation, 1.f);
 		}
 	}
+}
+
+void AGunBase::Reload()
+{
+	if (!characterStats)
+	{
+		UE_LOG(LogTemp, Error, TEXT("CharacterStats not set. Did you forget to call Init?"));
+		return;
+	}
+
+	if (characterStats->Ammo > 0)
+	{
+		characterStats->Reload(ClipSize);	//Should maybe use delegate instead for consistency/ability to hook to UI later
+		return;
+	}
+
 }
 

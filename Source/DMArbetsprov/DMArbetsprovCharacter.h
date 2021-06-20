@@ -43,6 +43,9 @@ public:
 	void Heal(AActor* healingSource, float healingAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void GiveAmmo(AActor * ammoSource, int amount);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void GiveNewWeapon(TSubclassOf<AGunBase> weapon);
 
 protected:
@@ -61,7 +64,9 @@ public:
 protected:
 
 	/** Fires a projectile. */
-	void OnFire();
+	void Fire();
+
+	void Reload();
 
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
