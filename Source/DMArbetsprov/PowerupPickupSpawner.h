@@ -8,13 +8,6 @@
 #include "DMArbetsprovGameMode.h"
 #include "PowerupPickupSpawner.generated.h"
 
-UENUM(BlueprintType)
-enum class EBranchEnum : uint8
-{
-	SUCCESS,
-	FAIL,
-};
-
 UCLASS()
 class DMARBETSPROV_API APowerupPickupSpawner : public AActor
 {
@@ -38,10 +31,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Powerup Pickup Spawner")
 	void SpawnPowerup(TSubclassOf<APowerupBase> _powerup);
-
-	UFUNCTION(BlueprintCallable, Category = "Powerup Pickup Spawner", Meta = (ExpandEnumAsExecs = "Branches",
-		ToolTip = "Will fail if netmode is client or if gamemode cannot be cast to DMArbetsprovGameMode."))
-	ADMArbetsprovGameMode* GetCastedGamemode(EBranchEnum& Branches);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup Pickup Spawner")
 	void OnPickup();

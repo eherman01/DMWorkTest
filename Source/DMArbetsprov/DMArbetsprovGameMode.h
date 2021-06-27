@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "PowerupBase.h"
+#include "MyEnums.h"
 #include "DMArbetsprovGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -15,6 +16,8 @@ class ADMArbetsprovGameMode : public AGameMode
 public:
 	ADMArbetsprovGameMode();
 
+	/* AI paths */
+	TMap<class ABotPath*, OwningTeam> paths;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float powerupSpawnDelay;
@@ -27,6 +30,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TSubclassOf<APowerupBase> GetRandomPowerup();
+
+	UFUNCTION(BlueprintCallable)
+	class ABotPath* GetRandomBotPath(OwningTeam team);
 
 };
 

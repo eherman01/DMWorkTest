@@ -26,3 +26,21 @@ TSubclassOf<APowerupBase> ADMArbetsprovGameMode::GetRandomPowerup()
 	return powerups[rand];
 
 }
+
+class ABotPath* ADMArbetsprovGameMode::GetRandomBotPath(OwningTeam team)
+{
+	TArray<class ABotPath*> viable;
+
+	for (auto it = paths.CreateConstIterator(); it; ++it) 
+	{
+		if (team == OwningTeam::Any || team == it->Value)
+			viable.Add(it->Key);
+
+	}
+
+	if (viable.Num() <= 0)
+		return nullptr;
+
+	int rand = FMath::FRandRange(0, viable.Num());
+	return viable[rand];
+}
