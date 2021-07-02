@@ -31,6 +31,14 @@ ADMArbetsprovProjectile::ADMArbetsprovProjectile()
 	InitialLifeSpan = 3.0f;
 }
 
+void ADMArbetsprovProjectile::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(source == GetController)
+
+}
+
 void ADMArbetsprovProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Only add impulse and destroy projectile if we hit a physics
@@ -38,6 +46,12 @@ void ADMArbetsprovProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherA
 	{
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 
+		/*class DMArbetsprovCharacter* hitActor = Cast<DMArbetsprovCharacter>(OtherActor);
+
+		if(hitActor)
+			OtherActor->TakeDamage(damage);*/
+
 		Destroy();
 	}
+
 }

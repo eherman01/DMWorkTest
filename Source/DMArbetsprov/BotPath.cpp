@@ -15,6 +15,12 @@ ABotPath::ABotPath()
 
 FVector ABotPath::GetNextPathPoint(UPARAM(Ref) int& currentPoint)
 {
+	if (path->GetNumberOfSplinePoints() == currentPoint) 
+	{
+		currentPoint = -1;
+		return FVector::ZeroVector;
+	}
+
 	FVector point = path->GetLocationAtSplinePoint(currentPoint, ESplineCoordinateSpace::World);
 	currentPoint += 1;
 

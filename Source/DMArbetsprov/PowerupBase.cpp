@@ -35,17 +35,14 @@ void APowerupBase::OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AAc
 	if (!player)
 		return;
 
-	//Do Local player stuff (handling item pickup etc)
-	OnPickup();
+	OnPickup(player);
 
 	//Callback to powerup base
 	OnPickupDel.ExecuteIfBound();
 
-	//Do Server stuff (applying stats etc)
 	if (GetNetMode() < NM_Client) 
-		PlayerApplyPowerup(player);
+		ServerOnPickup(player);
 
-	//Destroy
 	Destroy();
 	
 }

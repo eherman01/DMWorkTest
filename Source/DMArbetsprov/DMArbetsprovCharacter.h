@@ -24,12 +24,16 @@ class ADMArbetsprovCharacter : public ACharacter
 	class USkeletalMeshComponent* Mesh1P;
 
 	/** Gun */
-	UPROPERTY(BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnGetWeapon, BlueprintReadWrite, VisibleAnywhere, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	class AGunBase* Gun;
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
+
+	/** Widget Class Selector*/
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UIngameUI> WidgetClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCharacterStats* characterStats;
@@ -37,16 +41,18 @@ class ADMArbetsprovCharacter : public ACharacter
 public:
 	ADMArbetsprovCharacter();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
 	HealDelegate OnHeal;
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void Heal(AActor* healingSource, float healingAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void GiveAmmo(AActor * ammoSource, int amount);
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void GiveNewWeapon(TSubclassOf<AGunBase> weapon);
+
+	UFUNCTION()
+	void OnGetWeapon();
 
 protected:
 	virtual void BeginPlay();

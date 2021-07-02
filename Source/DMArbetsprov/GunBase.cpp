@@ -13,6 +13,8 @@ AGunBase::AGunBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	bReplicates = true;
+
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMesh"));
 	GunMesh->SetupAttachment(RootComponent);
@@ -37,22 +39,19 @@ void AGunBase::Tick(float DeltaTime)
 
 void AGunBase::Init(UCharacterStats* stats)
 {
+	characterStats = stats;
+
 	if (!stats)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Init failed: CharacterStats not set"));
 		return;
 	}
 
-	characterStats = stats;
-	characterStats->Reload(ClipSize);
-
 	OnFire.AddUObject(this, &AGunBase::Fire);
 	OnFire.AddUObject(characterStats, &UCharacterStats::Fire);
-
-	if (IsNetMode(NM_Client))
-		return;
-
 	characterStats->GiveAmmo(this, StartingAmmo);
+	characterStats->Reload(ClipSize);
+
 }
 
 void AGunBase::TryFire() 
@@ -65,18 +64,17 @@ void AGunBase::TryFire()
 
 	if (characterStats->AmmoInClip > 0)
 	{
-		if (!IsNetMode(NM_Client))
+		if (IsNetMode(NM_Client)) 
 		{
-			//Handle cheating attempt
-			//Clients may still shoot locally but no damage will be applied if cheating is detected
-			return;
+			OnFire.Broadcast();			//Fire locally
+			ServerFire();
 		}
-
-		OnFire.Broadcast();
 
 	}	
 
 }
+
+//Fire
 
 void AGunBase::Fire()
 {
@@ -116,6 +114,22 @@ void AGunBase::Fire()
 	}
 }
 
+void AGunBase::ServerFire_Implementation()
+{
+	OnFire.Broadcast();
+	UE_LOG(LogTemp, Warning, TEXT("ServerFire"));
+}
+
+bool AGunBase::ServerFire_Validate()
+{
+	if (characterStats->AmmoInClip <= 0)
+		return false;
+
+	return true;
+
+}
+
+//Reload
 void AGunBase::Reload()
 {
 	if (!characterStats)
@@ -126,9 +140,43 @@ void AGunBase::Reload()
 
 	if (characterStats->Ammo > 0)
 	{
-		characterStats->Reload(ClipSize);	//Should maybe use delegate instead for consistency/ability to hook to UI later
+		characterStats->Reload(ClipSize);
+		ServerReload();
 		return;
 	}
 
 }
 
+void AGunBase::ServerReload_Implementation() 
+{
+	characterStats->Reload(ClipSize);
+}
+
+bool AGunBase::ServerReload_Validate()
+{
+	if (characterStats->Ammo <= 0)
+		return false;
+
+	return true;
+}
+
+//Give Ammo
+void AGunBase::GiveAmmo(AActor* ammoSource, int amount)
+{
+	if (amount <= 0)
+		return;
+
+	characterStats->GiveAmmo(ammoSource, amount);
+	Client_GiveAmmo(ammoSource, amount);
+
+}
+
+void AGunBase::Client_GiveAmmo_Implementation(AActor* ammoSource, int amount)
+{
+	if (!IsNetMode(NM_Client))
+		return;
+
+	characterStats->GiveAmmo(ammoSource, amount);
+	UE_LOG(LogTemp, Warning, TEXT("ClientGiveAmmo"));
+
+}

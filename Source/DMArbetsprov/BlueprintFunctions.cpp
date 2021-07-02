@@ -2,3 +2,8 @@
 
 
 #include "BlueprintFunctions.h"
+
+float UBlueprintFunctions::ToPercent(float a, float b)
+{
+	return (1.0f / b) * a;
+}

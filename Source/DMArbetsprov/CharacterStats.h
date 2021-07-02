@@ -16,7 +16,8 @@ public:
 	// Sets default values for this component's properties
 	UCharacterStats();
 
-	AActor* Owner;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
+	class UIngameUI* UIObj;
 
 protected:
 	// Called when the game starts
@@ -24,16 +25,16 @@ protected:
 
 public:	
 
-	UPROPERTY(replicated, EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
 
-	UPROPERTY(replicated, EditAnywhere, BlueprintReadOnly, Category = "Health")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Health")
 	float Health;
 
-	UPROPERTY(replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 	int Ammo;
 
-	UPROPERTY(replicated, EditAnywhere, BlueprintReadOnly, Category = "Ammo")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Ammo")
 	int AmmoInClip;
 
 public:
@@ -43,18 +44,22 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
-	UFUNCTION()
-	void TakeDamage(AActor* damagedActor, float damage, const UDamageType* damageType, class AController* instigator, AActor* sourceActor);
-
-	UFUNCTION()
-	void Heal(AActor* healingSource, float healAmount);
-
-	UFUNCTION()
-	void GiveAmmo(AActor * ammoSource, int amount);
+	void UpdateUI();
 
 	UFUNCTION()
 	void Fire();
 
 	void Reload(int clipSize);
+
+public:
+
+	UFUNCTION()
+		void TakeDamage(AActor* damagedActor, float damage, const UDamageType* damageType, class AController* instigator, AActor* sourceActor);
+
+	UFUNCTION()
+		void Heal(AActor* healingSource, float healAmount);
+
+	UFUNCTION()
+		void GiveAmmo(AActor * ammoSource, int amount);
 
 };

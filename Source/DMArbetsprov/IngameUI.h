@@ -24,19 +24,19 @@ public:
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "IngameUI")
-	void UpdateHealthbar(float health, float maxHealth);
+	UPROPERTY(BlueprintReadonly)
+	class UCharacterStats* characterStats;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI Events")
+	void UpdateMaxHealth(float MaxHealth);
 
-	//Blueprint helper functions
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI Events")
+	void UpdateHealth(float Health);
 
-	UFUNCTION(BlueprintCallable, Category = "IngameUI")
-	static void UpdateUITextBlockText(UTextBlock* _textBlock, FString _text);
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI Events")
+	void UpdateAmmoInClip(int AmmoInClip);
 
-	UFUNCTION(BlueprintCallable, Category = "IngameUI")
-	static void UpdateUIProgressbarProgress(UProgressBar* _progressBar, float _progress);
-
-	UFUNCTION(BlueprintCallable, Category = "Float", meta = (Tooltip = "A is what percent of B?"))
-	static float ToPercent(float a, float b);
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI Events")
+	void UpdateAmmo(int Ammo);
 
 };

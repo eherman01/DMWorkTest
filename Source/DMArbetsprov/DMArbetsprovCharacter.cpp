@@ -8,6 +8,8 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
+#include "IngameUI.h"
+#include "AIController.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -46,6 +48,34 @@ ADMArbetsprovCharacter::ADMArbetsprovCharacter()
 	// are set in the derived blueprint asset named MyCharacter to avoid direct content references in C++.
 }
 
+void ADMArbetsprovCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ADMArbetsprovCharacter, Gun);
+
+}
+
+void ADMArbetsprovCharacter::BeginPlay()
+{
+	//Create UI
+	if (IsLocallyControlled() && IsValid(WidgetClass) && Cast<AAIController>(Controller) == nullptr)
+	{
+		characterStats->UIObj = Cast<UIngameUI>(CreateWidget(GetWorld(), WidgetClass));
+		characterStats->UIObj->AddToViewport(0);
+		characterStats->UIObj->characterStats = characterStats;
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName());
+	}
+
+	// Set up stat delegates
+	this->OnTakeAnyDamage.AddDynamic(characterStats, &UCharacterStats::TakeDamage);
+	this->OnHeal.AddUObject(characterStats, &UCharacterStats::Heal);
+
+	// Call the base class  
+	Super::BeginPlay();
+
+}
+
 void ADMArbetsprovCharacter::Heal(AActor* healingSource, float healingAmount)
 {
 
@@ -54,60 +84,66 @@ void ADMArbetsprovCharacter::Heal(AActor* healingSource, float healingAmount)
 
 	if (healingAmount <= 0)
 		return;
-	
+
 	OnHeal.Broadcast(healingSource, healingAmount);
 
 }
 
-void ADMArbetsprovCharacter::GiveAmmo(AActor* ammoSource, int amount)
-{
-
-	if (IsNetMode(NM_Client))
-		return;
-
-	if (amount <= 0)
-		return;
-
-	UE_LOG(LogTemp, Warning, TEXT("GiveAmmo"));
-	characterStats->GiveAmmo(ammoSource, amount);	//Maybe make delegate for consistency / UI integration
-
-}
+/////////////////////////////////////////////////////////////////////////
+// Weapon
 
 void ADMArbetsprovCharacter::GiveNewWeapon(TSubclassOf<AGunBase> weapon)
 {
+	if (IsNetMode(NM_Client))
+		return;
+
 	FActorSpawnParameters spawnInfo;
 	FTransform spawnTransform = GetActorTransform();
 
 	Gun = GetWorld()->SpawnActor<AGunBase>(weapon, spawnTransform, spawnInfo);
-	if (!Gun) 
+
+	if (!Gun)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn Gun!"));
 		return;
 	}
 
+	Gun->SetOwner(this);
+	Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 	Gun->Init(characterStats);
 
+	if (!IsNetMode(NM_DedicatedServer) && Cast<AAIController>(GetController()) == nullptr)
+		OnGetWeapon();
 
+}
+
+void ADMArbetsprovCharacter::OnGetWeapon()
+{
 	if (IsLocallyControlled()) 
 	{
 		Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
-	}
-	else
-	{
-		Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+
+		if (IsNetMode(NM_Client))
+			Gun->Init(characterStats);
 	}
 
 }
 
-void ADMArbetsprovCharacter::BeginPlay()
+void ADMArbetsprovCharacter::Fire()
 {
-	// Set up stat delegates
-	this->OnTakeAnyDamage.AddDynamic(characterStats, &UCharacterStats::TakeDamage);
-	this->OnHeal.AddUObject(characterStats, &UCharacterStats::Heal);
+	if (!Gun)
+		return;
 
-	// Call the base class  
-	Super::BeginPlay();
+	Gun->TryFire();
 
+}
+
+void ADMArbetsprovCharacter::Reload()
+{
+	if (!Gun)
+		return;
+
+	Gun->Reload();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -137,23 +173,6 @@ void ADMArbetsprovCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAxis("TurnRate", this, &ADMArbetsprovCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADMArbetsprovCharacter::LookUpAtRate);
-}
-
-void ADMArbetsprovCharacter::Fire()
-{
-	if (!Gun)
-		return;
-
-	Gun->TryFire();
-
-}
-
-void ADMArbetsprovCharacter::Reload()
-{
-	if (!Gun)
-		return;
-
-	Gun->Reload();
 }
 
 void ADMArbetsprovCharacter::MoveForward(float Value)

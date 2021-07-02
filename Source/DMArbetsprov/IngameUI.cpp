@@ -25,22 +25,3 @@ void UIngameUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 	// Do your custom tick stuff here
 }
-
-////////////////////////////////////////////////////////////////////////
-// All of this should definitly be refactored into a static class instead
-//
-void UIngameUI::UpdateUITextBlockText(UTextBlock* _textBlock, FString _text)
-{
-	_textBlock->SetText(FText::FromString(_text));
-}
-
-void UIngameUI::UpdateUIProgressbarProgress(UProgressBar* _progressBar, float _progress)
-{
-	_progressBar->SetPercent(_progress);
-}
-
-/* a is what percent of b */
-float UIngameUI::ToPercent(float a, float b)
-{
-	return (1.0f / b) * a;
-}

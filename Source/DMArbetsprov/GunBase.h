@@ -58,6 +58,18 @@ public:
 	UFUNCTION()
 	void Fire();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
+
 	void Reload();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerReload();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void GiveAmmo(AActor * ammoSource, int amount);
+
+	UFUNCTION(Client, Reliable)
+	void Client_GiveAmmo(AActor* ammoSource, int amount);
 
 };

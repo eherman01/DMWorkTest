@@ -10,16 +10,15 @@
  * 
  */
 
-UENUM(BlueprintType)
-enum class EBranchEnum : uint8
-{
-	SUCCESS,
-	FAIL,
-};
-
 UCLASS()
 class DMARBETSPROV_API UBlueprintFunctions : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
+
+public:
+
+	/* a is what percent of b */
+	UFUNCTION(BlueprintPure, Category = "Math\|Float", meta = (Tooltip = "A is what percent of B?"))
+	static float ToPercent(float a, float b);
 
 };

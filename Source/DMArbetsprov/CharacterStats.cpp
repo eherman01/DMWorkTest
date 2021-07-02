@@ -2,6 +2,7 @@
 
 
 #include "CharacterStats.h"
+#include "IngameUI.h"
 
 // Sets default values for this component's properties
 UCharacterStats::UCharacterStats()
@@ -10,7 +11,6 @@ UCharacterStats::UCharacterStats()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	Owner = GetOwner();
 	bReplicates = true;
 
 	MaxHealth = 100.0f;
@@ -40,8 +40,13 @@ void UCharacterStats::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	
 	DOREPLIFETIME_CONDITION(UCharacterStats, MaxHealth, COND_OwnerOnly);
 	DOREPLIFETIME_CONDITION(UCharacterStats, Health, COND_OwnerOnly);
-	DOREPLIFETIME_CONDITION(UCharacterStats, Ammo, COND_OwnerOnly);
-	DOREPLIFETIME_CONDITION(UCharacterStats, AmmoInClip, COND_OwnerOnly);
+
+	/* Instead of being replicated, these properties are tracked seperately on the client and the server. */
+	/* This is to make sure that the weapon can be fired with no delay in user feedback */
+	/* The server ultimately decides who is hit */
+
+	//DOREPLIFETIME_CONDITION(UCharacterStats, Ammo, COND_OwnerOnly);
+	//DOREPLIFETIME_CONDITION(UCharacterStats, AmmoInClip, COND_OwnerOnly);
 
 }
 
@@ -74,7 +79,6 @@ void UCharacterStats::GiveAmmo(AActor* ammoSource, int amount)
 
 void UCharacterStats::Fire()
 {
-
 	if (AmmoInClip < 1)
 		return;
 
@@ -89,4 +93,5 @@ void UCharacterStats::Reload(int clipSize)
 	int ammoToLoad = FMath::Min(clipSize - AmmoInClip, Ammo);
 	AmmoInClip += ammoToLoad;
 	Ammo -= ammoToLoad;
+
 }

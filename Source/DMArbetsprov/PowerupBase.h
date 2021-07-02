@@ -38,9 +38,9 @@ public:
 	void OnOverlapBegin(UPrimitiveComponent* _overlappedComponent, AActor* _otherActor, UPrimitiveComponent* _otherComponent, int32 _otherIndex, bool _bFromSweep, const FHitResult& _sweepResult);
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
-	void OnPickup();
+	void OnPickup(ADMArbetsprovCharacter* _player);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
-	void PlayerApplyPowerup(ADMArbetsprovCharacter* _player);
+	void ServerOnPickup(ADMArbetsprovCharacter* _player);
 
 };
