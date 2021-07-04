@@ -17,10 +17,11 @@ AGunBase::AGunBase()
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMesh"));
-	GunMesh->SetupAttachment(RootComponent);
+	RootComponent = GunMesh;
 	GunMesh->bCastDynamicShadow = false;
 	GunMesh->CastShadow = false;
-
+	GunMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	//GunMesh->MeshComponentUpdateFlag = 0;
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +42,11 @@ void AGunBase::Init(UCharacterStats* stats)
 {
 	characterStats = stats;
 
+	OnFire.AddUObject(this, &AGunBase::LocalFire);
+
+	if (IsNetMode(NM_Client))
+		return;
+
 	if (!stats)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Init failed: CharacterStats not set"));
@@ -54,6 +60,7 @@ void AGunBase::Init(UCharacterStats* stats)
 
 }
 
+/** Fire */
 void AGunBase::TryFire() 
 {
 	if (!characterStats) 
@@ -62,19 +69,12 @@ void AGunBase::TryFire()
 		return;
 	}
 
-	if (characterStats->AmmoInClip > 0)
+	if (characterStats->AmmoInClip > 0) 
 	{
-		if (IsNetMode(NM_Client)) 
-		{
-			OnFire.Broadcast();			//Fire locally
-			ServerFire();
-		}
-
-	}	
+		ServerFire();
+	}
 
 }
-
-//Fire
 
 void AGunBase::Fire()
 {
@@ -84,18 +84,21 @@ void AGunBase::Fire()
 		UWorld* const World = GetWorld();
 		if (World != NULL)
 		{
-			const FTransform spawn = GunMesh->GetSocketTransform(TEXT("Muzzle"));
-			const FVector position = spawn.GetLocation() + FVector(10.0f, 0.0f, 0.0f);
-			const FRotator rotation = spawn.Rotator();
+			const FVector position = GunMesh->GetSocketLocation(TEXT("Muzzle"));
 
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
 			// spawn the projectile at the muzzle
-			World->SpawnActor<ADMArbetsprovProjectile>(ProjectileClass, position, rotation, ActorSpawnParams);
+			ADMArbetsprovProjectile* projectile = World->SpawnActor<ADMArbetsprovProjectile>(ProjectileClass, position, AimRot, ActorSpawnParams);
+			projectile->HitDelegate.BindUObject(this, &AGunBase::OnWeaponHit);
 		}
 	}
 
+}
+
+void AGunBase::LocalFire() 
+{
 	// try and play the sound if specified
 	if (FireSound != NULL)
 	{
@@ -117,7 +120,6 @@ void AGunBase::Fire()
 void AGunBase::ServerFire_Implementation()
 {
 	OnFire.Broadcast();
-	UE_LOG(LogTemp, Warning, TEXT("ServerFire"));
 }
 
 bool AGunBase::ServerFire_Validate()
@@ -129,7 +131,13 @@ bool AGunBase::ServerFire_Validate()
 
 }
 
-//Reload
+/** On Hit */
+void AGunBase::OnWeaponHit(AActor* hit) 
+{
+	hit->TakeDamage(damage, damageType, Cast<APawn>(GetOwner())->Controller, this);
+}
+
+/** Reload */
 void AGunBase::Reload()
 {
 	if (!characterStats)
@@ -139,11 +147,7 @@ void AGunBase::Reload()
 	}
 
 	if (characterStats->Ammo > 0)
-	{
-		characterStats->Reload(ClipSize);
 		ServerReload();
-		return;
-	}
 
 }
 
@@ -160,23 +164,12 @@ bool AGunBase::ServerReload_Validate()
 	return true;
 }
 
-//Give Ammo
+/** Give Ammo */
 void AGunBase::GiveAmmo(AActor* ammoSource, int amount)
 {
 	if (amount <= 0)
 		return;
 
 	characterStats->GiveAmmo(ammoSource, amount);
-	Client_GiveAmmo(ammoSource, amount);
-
-}
-
-void AGunBase::Client_GiveAmmo_Implementation(AActor* ammoSource, int amount)
-{
-	if (!IsNetMode(NM_Client))
-		return;
-
-	characterStats->GiveAmmo(ammoSource, amount);
-	UE_LOG(LogTemp, Warning, TEXT("ClientGiveAmmo"));
 
 }

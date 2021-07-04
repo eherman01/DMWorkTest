@@ -1,6 +1,7 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "DMArbetsprovProjectile.h"
+#include "DMArbetsprovCharacter.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 
@@ -31,26 +32,21 @@ ADMArbetsprovProjectile::ADMArbetsprovProjectile()
 	InitialLifeSpan = 3.0f;
 }
 
-void ADMArbetsprovProjectile::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if(source == GetController)
-
-}
-
 void ADMArbetsprovProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Only add impulse and destroy projectile if we hit a physics
 	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherComp->IsSimulatingPhysics())
 	{
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
+		Destroy();
+	}
 
-		/*class DMArbetsprovCharacter* hitActor = Cast<DMArbetsprovCharacter>(OtherActor);
-
-		if(hitActor)
-			OtherActor->TakeDamage(damage);*/
-
+	if ((OtherActor != NULL) && 
+		(OtherActor != this) && 
+		(OtherComp != NULL)  &&
+		Cast<ADMArbetsprovCharacter>(OtherActor) != nullptr) //This is stupid and should use interfaces instead
+	{
+		HitDelegate.ExecuteIfBound(OtherActor);
 		Destroy();
 	}
 

@@ -13,21 +13,28 @@ class DMARBETSPROV_API AGunBase : public AActor
 {
 	GENERATED_BODY()
 
-	/** Pawn mesh: 1st person view (arms; seen only by self) */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-	class USkeletalMeshComponent* GunMesh;
-
 	FireDelegate OnFire;
 	
 public:	
 	// Sets default values for this actor's properties
 	AGunBase();
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* GunMesh;
+
 	UPROPERTY(EditAnywhere, Category = Ammo)
 	int StartingAmmo;
 
 	UPROPERTY(EditAnywhere, Category = Ammo)
 	int ClipSize;
+
+	FRotator AimRot;
+
+	UPROPERTY(EditAnywhere, Category = Projectile)
+	float damage;
+
+	UPROPERTY(EditAnywhere, Category = Projectile)
+	FDamageEvent damageType;
 
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
@@ -58,8 +65,13 @@ public:
 	UFUNCTION()
 	void Fire();
 
+	void LocalFire();
+
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerFire();
+
+	UFUNCTION()
+	void OnWeaponHit(AActor* hit);
 
 	void Reload();
 
@@ -68,8 +80,5 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void GiveAmmo(AActor * ammoSource, int amount);
-
-	UFUNCTION(Client, Reliable)
-	void Client_GiveAmmo(AActor* ammoSource, int amount);
 
 };

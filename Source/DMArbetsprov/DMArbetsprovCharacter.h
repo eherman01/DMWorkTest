@@ -27,6 +27,9 @@ class ADMArbetsprovCharacter : public ACharacter
 	UPROPERTY(ReplicatedUsing = OnGetWeapon, BlueprintReadWrite, VisibleAnywhere, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	class AGunBase* Gun;
 
+	/** First person gun, used by host on listenserver */
+	class USkeletalMeshComponent* Gun1PCosmetic;
+
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
@@ -91,6 +94,15 @@ protected:
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	 */
 	void LookUpAtRate(float Rate);
+
+	UFUNCTION(Server, Unreliable, WithValidation)
+	void ServerSyncControlRot(FRotator controlRotation);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastSyncControlRot(FRotator controlRotation);
+
+	UPROPERTY(BlueprintReadWrite)
+	FRotator controlRot;
 	
 protected:
 

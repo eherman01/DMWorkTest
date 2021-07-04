@@ -2,6 +2,9 @@
 
 #include "DMArbetsprovCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Engine/StaticMeshActor.h"
+#include "Components/SceneComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
@@ -64,7 +67,6 @@ void ADMArbetsprovCharacter::BeginPlay()
 		characterStats->UIObj = Cast<UIngameUI>(CreateWidget(GetWorld(), WidgetClass));
 		characterStats->UIObj->AddToViewport(0);
 		characterStats->UIObj->characterStats = characterStats;
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName());
 	}
 
 	// Set up stat delegates
@@ -110,7 +112,7 @@ void ADMArbetsprovCharacter::GiveNewWeapon(TSubclassOf<AGunBase> weapon)
 
 	Gun->SetOwner(this);
 	Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
-	Gun->Init(characterStats);
+	Gun->Init(characterStats); 
 
 	if (!IsNetMode(NM_DedicatedServer) && Cast<AAIController>(GetController()) == nullptr)
 		OnGetWeapon();
@@ -119,31 +121,28 @@ void ADMArbetsprovCharacter::GiveNewWeapon(TSubclassOf<AGunBase> weapon)
 
 void ADMArbetsprovCharacter::OnGetWeapon()
 {
-	if (IsLocallyControlled()) 
+	//Setup cosmetic weapon
+	if (IsLocallyControlled())
 	{
-		Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+		Gun1PCosmetic = NewObject<USkeletalMeshComponent>(this);
+		Gun1PCosmetic->RegisterComponent();
 
-		if (IsNetMode(NM_Client))
+		if(IsNetMode(NM_Client))
 			Gun->Init(characterStats);
+
+		if (Gun1PCosmetic)
+		{
+			Gun1PCosmetic->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+			Gun1PCosmetic->SetSkeletalMesh(Gun->GunMesh->SkeletalMesh);
+			Gun->GunMesh->SetVisibility(false);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to spawn cosmetic gun"));
+		}
+
 	}
 
-}
-
-void ADMArbetsprovCharacter::Fire()
-{
-	if (!Gun)
-		return;
-
-	Gun->TryFire();
-
-}
-
-void ADMArbetsprovCharacter::Reload()
-{
-	if (!Gun)
-		return;
-
-	Gun->Reload();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -175,6 +174,23 @@ void ADMArbetsprovCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADMArbetsprovCharacter::LookUpAtRate);
 }
 
+void ADMArbetsprovCharacter::Fire()
+{
+	if (!Gun)
+		return;
+
+	Gun->TryFire();
+
+}
+
+void ADMArbetsprovCharacter::Reload()
+{
+	if (!Gun)
+		return;
+
+	Gun->Reload();
+}
+
 void ADMArbetsprovCharacter::MoveForward(float Value)
 {
 	if (Value != 0.0f)
@@ -203,4 +219,29 @@ void ADMArbetsprovCharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+
+	controlRot = GetControlRotation();
+	ServerSyncControlRot(controlRot);
+
+}
+
+void ADMArbetsprovCharacter::ServerSyncControlRot_Implementation(FRotator controlRotation)
+{
+	controlRot = controlRotation;
+	MulticastSyncControlRot(controlRot);
+}
+
+bool ADMArbetsprovCharacter::ServerSyncControlRot_Validate(FRotator controlRotation)
+{
+	return true;
+}
+
+void ADMArbetsprovCharacter::MulticastSyncControlRot_Implementation(FRotator controlRotation)
+{
+	if (Gun) 
+	{
+		Gun->AimRot = controlRotation;
+	}
+
+	controlRot = controlRotation;
 }

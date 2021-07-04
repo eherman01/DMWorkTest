@@ -40,13 +40,8 @@ void UCharacterStats::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	
 	DOREPLIFETIME_CONDITION(UCharacterStats, MaxHealth, COND_OwnerOnly);
 	DOREPLIFETIME_CONDITION(UCharacterStats, Health, COND_OwnerOnly);
-
-	/* Instead of being replicated, these properties are tracked seperately on the client and the server. */
-	/* This is to make sure that the weapon can be fired with no delay in user feedback */
-	/* The server ultimately decides who is hit */
-
-	//DOREPLIFETIME_CONDITION(UCharacterStats, Ammo, COND_OwnerOnly);
-	//DOREPLIFETIME_CONDITION(UCharacterStats, AmmoInClip, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UCharacterStats, Ammo, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UCharacterStats, AmmoInClip, COND_OwnerOnly);
 
 }
 
