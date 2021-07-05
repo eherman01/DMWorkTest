@@ -24,7 +24,7 @@ public:
 	class ADMArbetsprovGameMode* gamemode;
 
 	UPROPERTY(EditAnywhere)
-	TEnumAsByte<OwningTeam> owningTeam = OwningTeam::Any;
+	TEnumAsByte<Team> owningTeam = Team::Any;
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetNextPathPoint(UPARAM(Ref) int& currentPoint);

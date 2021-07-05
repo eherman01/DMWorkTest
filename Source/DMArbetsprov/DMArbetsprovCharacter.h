@@ -57,6 +57,18 @@ public:
 	UFUNCTION()
 	void OnGetWeapon();
 
+	UFUNCTION()
+	void OnTakeDamage(AActor * damagedActor, float damage, const UDamageType * damageType, AController * _instigator, AActor * sourceActor);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastOnDeath();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Death")
+	void OnDeath();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Death")
+	void Respawn(AController* _controller);
+
 protected:
 	virtual void BeginPlay();
 
@@ -109,6 +121,7 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
+	bool bIsAlive = true;
 
 public:
 	/** Returns Mesh1P subobject **/

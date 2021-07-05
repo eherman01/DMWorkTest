@@ -91,7 +91,9 @@ void AGunBase::Fire()
 
 			// spawn the projectile at the muzzle
 			ADMArbetsprovProjectile* projectile = World->SpawnActor<ADMArbetsprovProjectile>(ProjectileClass, position, AimRot, ActorSpawnParams);
-			projectile->HitDelegate.BindUObject(this, &AGunBase::OnWeaponHit);
+
+			if(projectile)
+				projectile->HitDelegate.BindUObject(this, &AGunBase::OnWeaponHit);
 		}
 	}
 
@@ -119,7 +121,8 @@ void AGunBase::LocalFire()
 
 void AGunBase::ServerFire_Implementation()
 {
-	OnFire.Broadcast();
+	if(OnFire.IsBound())
+		OnFire.Broadcast();
 }
 
 bool AGunBase::ServerFire_Validate()

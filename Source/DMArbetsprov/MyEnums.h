@@ -18,7 +18,7 @@ class DMARBETSPROV_API UMyEnums : public UBlueprintFunctionLibrary
 };
 
 UENUM()
-enum OwningTeam {
+enum Team {
 	Any,
 	TeamA,
 	TeamB,

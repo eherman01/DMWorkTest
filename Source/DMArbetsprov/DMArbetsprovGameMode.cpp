@@ -27,13 +27,13 @@ TSubclassOf<APowerupBase> ADMArbetsprovGameMode::GetRandomPowerup()
 
 }
 
-class ABotPath* ADMArbetsprovGameMode::GetRandomBotPath(OwningTeam team)
+class ABotPath* ADMArbetsprovGameMode::GetRandomBotPath(Team team)
 {
 	TArray<class ABotPath*> viable;
 
 	for (auto it = paths.CreateConstIterator(); it; ++it) 
 	{
-		if (team == OwningTeam::Any || team == it->Value)
+		if (team == Team::Any || team == it->Value)
 			viable.Add(it->Key);
 
 	}

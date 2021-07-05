@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
@@ -70,7 +71,7 @@ void ADMArbetsprovCharacter::BeginPlay()
 	}
 
 	// Set up stat delegates
-	this->OnTakeAnyDamage.AddDynamic(characterStats, &UCharacterStats::TakeDamage);
+	this->OnTakeAnyDamage.AddDynamic(this, &ADMArbetsprovCharacter::OnTakeDamage);
 	this->OnHeal.AddUObject(characterStats, &UCharacterStats::Heal);
 
 	// Call the base class  
@@ -89,6 +90,37 @@ void ADMArbetsprovCharacter::Heal(AActor* healingSource, float healingAmount)
 
 	OnHeal.Broadcast(healingSource, healingAmount);
 
+}
+
+void ADMArbetsprovCharacter::OnTakeDamage(AActor* damagedActor, float damage, const UDamageType* damageType, AController* _instigator, AActor* sourceActor) 
+{
+	characterStats->TakeDamage(damagedActor, damage, damageType, _instigator, sourceActor);
+
+	if (characterStats->Health <= 0)
+	{
+
+		if (!bIsAlive)
+			return;
+
+		GetMovementComponent()->StopMovementImmediately();
+		Respawn(Controller);
+		Controller->UnPossess();
+		MulticastOnDeath();
+
+		bIsAlive = false;
+
+	}
+}
+
+void ADMArbetsprovCharacter::MulticastOnDeath_Implementation()
+{
+	if (characterStats->UIObj != nullptr)
+		characterStats->UIObj->RemoveFromViewport();
+
+	if(Gun1PCosmetic != nullptr)
+		Gun1PCosmetic->SetVisibility(false);
+
+	OnDeath();
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -134,6 +166,7 @@ void ADMArbetsprovCharacter::OnGetWeapon()
 		{
 			Gun1PCosmetic->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 			Gun1PCosmetic->SetSkeletalMesh(Gun->GunMesh->SkeletalMesh);
+			Gun1PCosmetic->SetCastShadow(false);
 			Gun->GunMesh->SetVisibility(false);
 		}
 		else

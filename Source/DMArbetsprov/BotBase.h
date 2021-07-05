@@ -26,7 +26,7 @@ class DMARBETSPROV_API ABotBase : public AAIController
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<OwningTeam> team;
+	TEnumAsByte<Team> team;
 
 	UPROPERTY(BlueprintReadOnly)
 	class ABotPath* botPath;
