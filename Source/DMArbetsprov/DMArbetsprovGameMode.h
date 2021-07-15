@@ -17,7 +17,7 @@ public:
 	ADMArbetsprovGameMode();
 
 	/* AI paths */
-	TMap<class ABotPath*, Team> paths;
+	//TMap<class ABotPath*, Team> paths;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float powerupSpawnDelay;
@@ -30,9 +30,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TSubclassOf<APowerupBase> GetRandomPowerup();
-
-	UFUNCTION(BlueprintCallable)
-	class ABotPath* GetRandomBotPath(Team team);
 
 };
 

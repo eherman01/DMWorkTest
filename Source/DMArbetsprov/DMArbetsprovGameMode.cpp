@@ -27,7 +27,7 @@ TSubclassOf<APowerupBase> ADMArbetsprovGameMode::GetRandomPowerup()
 
 }
 
-class ABotPath* ADMArbetsprovGameMode::GetRandomBotPath(Team team)
+/*class ABotPath* ADMArbetsprovGameMode::GetRandomBotPath(Team team)
 {
 	TArray<class ABotPath*> viable;
 
@@ -44,3 +44,4 @@ class ABotPath* ADMArbetsprovGameMode::GetRandomBotPath(Team team)
 	int rand = FMath::FRandRange(0, viable.Num());
 	return viable[rand];
 }
+*/

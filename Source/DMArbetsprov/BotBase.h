@@ -27,11 +27,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TEnumAsByte<Team> team;
-
-	UPROPERTY(BlueprintReadOnly)
-	class ABotPath* botPath;
-
-	UFUNCTION(BlueprintCallable, Category = "AI\|Navigation", Meta = (ExpandEnumAsExecs = "Branches"))
-	void GetRandomBotPath(EBranchEnum& Branches);
 	
 };
